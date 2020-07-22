@@ -15,6 +15,8 @@ import (
 	"github.com/adiletabylov/staxxapi/model"
 )
 
+const contentTypeJSON string = "application/json"
+
 // DownloadFile will download a url to a local file. It's efficient because it will
 // write as it downloads and not load the whole file into memory. We pass an io.TeeReader
 // into Copy() to report progress on the download.
@@ -117,6 +119,16 @@ func newfileUploadRequest(uri string, params map[string]string, paramName, path 
 // Get makes GET request by given url and parses and returns Response.
 func Get(url string) (*model.Response, error) {
 	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	return model.NewResponseFromBody(resp.Body)
+}
+
+// Post makes POST request by given url and parses and returns Response.
+func Post(url string, data io.Reader) (*model.Response, error) {
+	resp, err := http.Post(url, contentTypeJSON, data)
 	if err != nil {
 		return nil, err
 	}
