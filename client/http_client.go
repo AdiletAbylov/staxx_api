@@ -58,28 +58,17 @@ func DownloadFile(filepath string, url string, printer helpers.ProgressPrinter) 
 
 // UploadFile uploads file from given filepath to the given upload path
 // with given params map and using POST request.
-func UploadFile(filepath string, params map[string]string, uploadpath string, printer helpers.ProgressPrinter) error {
+func UploadFile(filepath string, params map[string]string, uploadpath string, printer helpers.ProgressPrinter) (*model.Response, error) {
 	req, err := newfileUploadRequest(uploadpath, params, "snapshot[file]", filepath, printer)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return err
-	}
-	body := &bytes.Buffer{}
-	_, err = body.ReadFrom(resp.Body)
-	if err != nil {
-		return err
+		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("Upload response status code %d", resp.StatusCode)
-	}
-	//fmt.Println(resp.StatusCode)
-	// fmt.Println(resp.Header)
-	// fmt.Println(body)
-	return nil
+	return model.NewResponseFromBody(resp.Body)
 }
 
 // Creates a new file upload http request with optional extra params
@@ -88,6 +77,9 @@ func newfileUploadRequest(uri string, params map[string]string, paramName, path 
 	if err != nil {
 		return nil, err
 	}
+	fileInfo, _ := file.Stat()
+
+	printer.Total = uint64(fileInfo.Size())
 	defer file.Close()
 
 	body := &bytes.Buffer{}

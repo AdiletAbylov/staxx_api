@@ -10,7 +10,7 @@ const responseStatusOK int64 = 0
 // Response type describes response struct from service
 type Response struct {
 	Data    interface{}
-	Errors  []ResponseError "json:omitempty"
+	Errors  []ResponseError `json:",omitempty"`
 	Status  int64
 	Message string
 }

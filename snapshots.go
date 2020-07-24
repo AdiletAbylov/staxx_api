@@ -11,11 +11,11 @@ func DownloadSnapshot(snapshotID string, filepath string, printFunc func(bytesWr
 	url := helpers.BuildURL(connectionString(), "snapshots", snapshotID, "download")
 	printer := helpers.NewProgressPrinter(printFunc)
 	return client.DownloadFile(filepath, url, printer)
-
 }
 
-// UploadSnapshot uploads snapshot file
-func UploadSnapshot(filepath string, description string, chainType string, printFunc func(bytesWrited uint64, bytesTotal uint64)) error {
+// UploadSnapshot uploads snapshot file.
+// Returns uploaded snapshot details.
+func UploadSnapshot(filepath string, description string, chainType string, printFunc func(bytesWrited uint64, bytesTotal uint64)) (*model.Response, error) {
 	params := map[string]string{
 		"snapshot[description]": description,
 		"snapshot[type]":        chainType,
@@ -28,20 +28,11 @@ func UploadSnapshot(filepath string, description string, chainType string, print
 // RemoveSnapshot makes DELETE request to remove snapshot with given id
 func RemoveSnapshot(snapshotID string) (*model.Response, error) {
 	url := helpers.BuildURL(connectionString(), "snapshots", snapshotID)
-	resp, err := client.Delete(url)
-	if err != nil {
-		return nil, err
-	}
-	return resp, err
+	return client.Delete(url)
 }
 
 // ListSnapshots makes GET request and returns list of snapshots of given evm type
 func ListSnapshots(evmType string) (*model.Response, error) {
 	url := helpers.BuildURL(connectionString(), "snapshots", evmType)
-
-	resp, err := client.Get(url)
-	if err != nil {
-		return nil, err
-	}
-	return resp, err
+	return client.Get(url)
 }
