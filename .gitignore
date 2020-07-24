@@ -22,3 +22,8 @@
 /Godeps/
 # snapshot files
 *.tgz
+
+# Dir for test files
+priv/
+
+.DS_Store
