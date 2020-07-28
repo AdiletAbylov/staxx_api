@@ -49,8 +49,8 @@ func TestUploadSnapshotAndDownload(t *testing.T) {
 	downerr := DownloadSnapshot(snapshotID, filepathDownload, printDownloadFunction)
 
 	assert.Nil(t, downerr, "Error should be nil")
-	_, err = os.Stat(filepathDownload)
-	assert.Nil(t, err, "FileInfo should be without error")
+
+	assert.FileExists(t, filepathDownload, "Downloaded file should exists")
 
 	resp, err = RemoveSnapshot(snapshotID)
 	assert.Nil(t, err, "Error should be nil")
