@@ -1,10 +1,10 @@
 package staxxapi
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
+	"github.com/Pallinder/go-randomdata"
 	"github.com/adiletabylov/staxxapi/model"
 	"github.com/stretchr/testify/assert"
 )
@@ -89,9 +89,40 @@ func TestRemoveEnv(t *testing.T) {
 	assert.True(t, removeResp.IsResponseStatusOK())
 
 	detailsResp, err := EnvDetails(envID)
-	fmt.Printf("f: %+v", detailsResp)
+
 	assert.Nil(t, err, "Error should be nil")
 	assert.False(t, detailsResp.IsResponseStatusOK(), "Response status should be false")
 	assert.Greater(t, len(detailsResp.Errors), 0, "There should be error for details request")
 	assert.Equal(t, "Not Found", detailsResp.Errors[0].Detail)
+}
+
+func TestTakeSnapshot(t *testing.T) {
+	Init("http://localhost", "4000")
+	config := model.TestchainConfig{
+		Type:          "geth",
+		BlockMineTime: 0,
+		CleanOnStop:   true,
+		Accounts:      2,
+		DeployRef:     "refs/tags/staxx-testrunner",
+		DeployStepID:  0,
+	}
+	testchain := model.Testchain{
+
+		Config: config,
+		Deps:   []string{},
+	}
+
+	resp, err := CreateEnv(&testchain)
+	assert.Nil(t, err, "Error should be nil")
+	assert.NotNil(t, resp, "Response shouldn't be nil")
+
+	envID := resp.Data.(map[string]interface{})["id"].(string)
+
+	resp, err = TakeSnapshot(envID, randomdata.Alphanumeric(10))
+
+	assert.Nil(t, err, "Error should be nil")
+	assert.NotNil(t, resp, "Response shouldn't be nil")
+	message := resp.Data.(map[string]interface{})["message"].(string)
+	assert.Equal(t, "Taking snapshot.", message)
+
 }
